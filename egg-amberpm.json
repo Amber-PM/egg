@@ -1,0 +1,72 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-10-27T00:00:00+00:00",
+    "name": "AmberPM",
+    "author": "your-email@example.com",
+    "description": "AmberPM, a multi-version PocketMine-MP fork with NetherNet for Minecraft Bedrock 26.60+.",
+    "features": null,
+    "docker_images": {
+        "Debian": "ghcr.io/parkervcp/yolks:debian"
+    },
+    "file_denylist": [],
+    "startup": "if [ -z \"${AMBER_NETHERNET_PORT}\" ]; then export AMBER_NETHERNET_PORT={{SERVER_PORT}}; RAKNET=-1; else RAKNET=0; fi; ./bin/php7/bin/php ./PocketMine-MP.phar --no-wizard --disable-ansi --network.raknet-port=${RAKNET}",
+    "config": {
+        "files": "{\n    \"server.properties\": {\n        \"parser\": \"properties\",\n        \"find\": {\n            \"server-ip\": \"0.0.0.0\",\n            \"server-port\": \"{{server.build.default.port}}\"\n        }\n    }\n}",
+        "startup": "{\n    \"done\": \")! For help\"\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n# AmberPM egg installer: PHP binaries with ext-rtc and the AmberPM phar\nset -euo pipefail\n\napt-get update\napt-get install -y curl ca-certificates tar\n\nmkdir -p /mnt/server\ncd /mnt/server\n\nif [[ \"$(uname -m)\" != \"x86_64\" ]]; then\n\techo \"AmberPM PHP binaries are only published for x86_64\"\n\texit 1\nfi\n\nPHP_TAG=\"${PHP_BINARIES_TAG:-amber-php-8.4.27-r3}\"\nPHP_FILE=\"PHP-8.4-Linux-x86_64-PM5.tar.gz\"\nPHP_BASE=\"https://github.com/Amber-PM/PHP-Binaries/releases/download/${PHP_TAG}\"\n\necho \"Downloading PHP binaries ${PHP_TAG}\"\ncurl -fsSL -o \"${PHP_FILE}\" \"${PHP_BASE}/${PHP_FILE}\"\ncurl -fsSL -o SHA256SUMS.txt \"${PHP_BASE}/SHA256SUMS.txt\"\ntr -d '\\r' < SHA256SUMS.txt | grep \" ${PHP_FILE}$\" | sha256sum -c -\nrm -rf bin\ntar -xzf \"${PHP_FILE}\"\nrm -f \"${PHP_FILE}\" SHA256SUMS.txt\n\nif [[ \"${AMBER_VERSION:-latest}\" == \"latest\" ]]; then\n\tPHAR_URL=\"https://github.com/Amber-PM/Amber/releases/latest/download/PocketMine-MP.phar\"\nelse\n\tPHAR_URL=\"https://github.com/Amber-PM/Amber/releases/download/${AMBER_VERSION}/PocketMine-MP.phar\"\nfi\necho \"Downloading AmberPM ${AMBER_VERSION:-latest}\"\ncurl -fsSL -o PocketMine-MP.phar \"${PHAR_URL}\"\n\n./bin/php7/bin/php -r 'exit(extension_loaded(\"rtc\") ? 0 : 1);' || { echo \"ext-rtc is not loaded, NetherNet will not start\"; exit 1; }\necho \"AmberPM installed\"\n",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Public IP",
+            "description": "Public IP players connect to. Needed because the container only knows its private address.",
+            "env_variable": "AMBER_NETHERNET_PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|ip",
+            "field_type": "text"
+        },
+        {
+            "name": "NetherNet UDP port",
+            "description": "An extra allocation for NetherNet game traffic, so every version joins on the main port. Leave empty to use the main port, which turns RakNet off and only lets 26.60+ clients join.",
+            "env_variable": "AMBER_NETHERNET_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "AmberPM version",
+            "description": "Release tag to install, or latest.",
+            "env_variable": "AMBER_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "PHP binaries tag",
+            "description": "Amber-PM/PHP-Binaries release with ext-rtc.",
+            "env_variable": "PHP_BINARIES_TAG",
+            "default_value": "amber-php-8.4.27-r3",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        }
+    ]
+}
