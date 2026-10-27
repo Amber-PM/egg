@@ -40,7 +40,7 @@
         },
         {
             "name": "NetherNet UDP port",
-            "description": "An extra allocation for NetherNet game traffic, so every version joins on the main port. Leave empty to use the main port, which turns RakNet off and only lets 26.60+ clients join.",
+            "description": "An extra allocation for NetherNet game traffic, so every version joins on the main port. Leave empty to use the main port, which turns RakNet off and only lets 26.50+ clients join.",
             "env_variable": "AMBER_NETHERNET_PORT",
             "default_value": "",
             "user_viewable": true,

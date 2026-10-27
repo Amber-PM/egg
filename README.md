@@ -30,7 +30,7 @@ Installs the [AmberPM](https://github.com/Amber-PM/Amber) phar and the [PHP bina
 | Allocations | Result |
 |---|---|
 | Main port + one extra (recommended) | Set the extra one as NetherNet UDP port. Every version joins on `IP:main` |
-| Main port only | Leave NetherNet UDP port empty. RakNet is turned off, only 26.60+ can join |
+| Main port only | Leave NetherNet UDP port empty. RakNet is turned off, only 26.50+ can join |
 
 The node must forward allocations with the same port number outside and inside.
 
